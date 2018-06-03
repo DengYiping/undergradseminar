@@ -1,0 +1,183 @@
+\documentclass[12pt,a4paper]{amsart}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage[latin2]{inputenc}
+\usepackage{t1enc}
+\usepackage[mathscr]{eucal}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{pict2e}
+\usepackage{epic}
+\numberwithin{equation}{section}
+\usepackage[margin=2.9cm]{geometry}
+\usepackage{epstopdf} 
+
+ \def\numset#1{{\\mathbb #1}}
+
+ 
+
+\theoremstyle{plain}
+\newtheorem{Th}{Theorem}[section]
+\newtheorem{Lemma}[Th]{Lemma}
+\newtheorem{Cor}[Th]{Corollary}
+\newtheorem{Prop}[Th]{Proposition}
+
+ \theoremstyle{definition}
+\newtheorem{Def}[Th]{Definition}
+\newtheorem{Conj}[Th]{Conjecture}
+\newtheorem{Rem}[Th]{Remark}
+\newtheorem{?}[Th]{Problem}
+\newtheorem{Ex}[Th]{Example}
+
+\newcommand{\im}{\operatorname{im}}
+\newcommand{\Hom}{{\rm{Hom}}}
+\newcommand{\diam}{{\rm{diam}}}
+\newcommand{\ovl}{\overline}
+%\newcommand{\M}{\mathbb{M}}
+
+\begin{document}
+
+\title{Fermat's little theorem, Euler's theorem}
+
+\author[Y. Deng]{Yiping Deng}
+
+\address{P.O 182 College Ring 7, 28759 Bremen, Germany} 
+
+\email{y.deng@jacobs-university.de}
+
+
+
+
+
+
+
+
+
+
+ \keywords{Fermat's little theorem, Euler's theorem} 
+
+
+
+\begin{abstract}
+    The aim of this paper is to give a concrete proof of
+    Fermat's little theorem, as well as Euler-Fermat's theorem.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction} Fermat's little theorem is one of
+the most fundamental theorem in number theory. It provides
+a method to test whether a arbitray natural number is a prime
+number. Euler's theorem, however, is the more general case
+for Fermat's little theorem.
+
+This paper is aiming at proving Euler's theorem, and later
+use it to prove its special case, Fermat's little theorem.
+
+Now we present Euler's theorem.
+
+\begin{Th} \label{main} \cite{basicdef} if $n$ and $a$ are coprime positive
+    integer, then $$a^{\Phi(n)} \equiv 1 \pmod n$$
+\end{Th}
+
+\section{Theorem~\ref{main} explained} To understand the theorem, proper definition of Euler's
+totient function should be introduced.
+\begin{Def} \label{eulerfct} (Euler's Totient Function). Euler's Totient Function, denoted $\Phi$,
+    is the number of integers $k$ in the range $1 \leq k \leq n$ such that $gcd(n, k) = 1$. \cite{basicdef}
+\end{Def}
+
+Once given Definition~\ref{eulerfct}, consider its special case
+that $n$ is a prime number. $\Phi(p) = p - 1$. Such case
+is exactly Fermat's little theorem.
+
+\begin{Th} \label{fermatlitte} (Fermat's little theorem).\cite{basicdef} For any integer $a$ relatively prime to prime $p$, then
+    $$ a^{p - 1} \equiv 1 \pmod p $$
+\end{Th}
+
+Hence, we shall only focus on the proof of Theorem~\ref{main}.
+
+\section{Theorem~\ref{main} and Reduced Residue System} We shall see that
+Theorem~\ref{main} is closely connected with reduced residual
+system.
+
+\begin{Def} \label{rrs} (Reduced Residue System). Any subset $ R \subset \mathbb{Z}$ is called
+    a reduced residue system modulo $n$ if
+    \begin{enumerate}
+        \item $\forall r \in R. gcd(r, n) = 1$
+        \item $\left\vert{R}\right\vert = \Phi(n)$
+        \item no two elements are congrulent modulo $n$
+    \end{enumerate}
+\end{Def}
+
+Consider the simplest Reduced Residue System, called Least Positive Coprime Residues.
+
+\begin{Def} \label{lpcr} (Least Positive Coprime Residues). The Least Positive Coprime
+    Residues modulo $n$ is a Reduced Residue System that satisfies $\forall r \in R. 0 < r < n$.
+\end{Def}
+
+It is intuitive that there is a bijection between two Reduced Residue System. A proof that
+there exists a bijection between Reduced Residue System and Least Positive Coprime Residues
+is sufficient.
+
+\begin{Lemma} \label{bijection} (Bijection Between Reduced Residue System and Least Positive Coprime Residues). 
+    There exists a bijection $\omega: R \to L$, where $R$ is a Reduced Residue System modulo $n$ and $L$ is a
+    Least Positive Coprime Residues modulo $n$, and $\omega(r) \equiv r \pmod n$
+\end{Lemma}
+
+The proof for Lemma~\ref{bijection} is straight forward
+\begin{proof}
+    First, we need to prove that $\omega$ will not map into
+    any elements outside of $L$.
+
+    Assume $\exists r \in R.\forall l \in L. r \not\equiv l \pmod n$.
+    We know that $\exists 0 \leq r < n. r \equiv p \pmod n$. Such $p \not\in L$
+    $gcd(p, n) \neq 1 \implies gcd(r, n) \neq 1$. Contradiction.
+
+    For "Injectivity", we assume not. $\exists r_1, r_2 \in R, r_1 \neq r_2. \omega(r_1) = \omega(r_2)$
+    It implies that $r_1 \equiv l \equiv r_2 \pmod n \implies r_1 \equiv r_2 \pmod n$. Another Contradiction.
+
+    For "Surjectivity", it is sufficient to show that $\left\vert{R}\right\vert = \left\vert{L}\right\vert = \Phi(n)$.
+    
+    Hence, such bijection exists.
+\end{proof}
+
+Also, there is another interesting property of Reduced Residue System.
+
+\begin{Lemma} \label{multiplicity} Let $n > 0$. For any Reduced Residue System
+    modulo $n$, denoted $R$, and any interger $a$ coprime to $n$, $R' = \{a r \mid r \in R\}$ is also
+    a Reduced Residue System.
+\end{Lemma}
+Proof for Lemma~\ref{multiplicity} is the following
+\begin{proof}
+    First, $\forall r \in R. gcd(r, n) = 1$ and $gcd(a, n) = 1 \implies gcd(a r, n) = 1$
+    Also, assume $\exists r_1, r_2 \in R, r_1 \neq r_2. a r_1 \equiv a r_2 \pmod n$. This implies
+    that $a r_1 - a r_2$ is divisible by n, also $gcd(a, n) = 1 \implies$
+    $r_1 - r_2$ is divisible by $n \implies r_1 \equiv r_2 \pmod n$
+\end{proof}
+
+\section{Proof of Theorem~\ref{main}}
+We can uses any Reduced Residue System to prove Theorem~\ref{main}
+\begin{proof}
+    Let $n$, $a$ to be two coprime positive integer. Pick a Reduced Residue System modulo $n$,
+    then $R' = \{ a \cdot r \mid r \in R \}$ is also a Reduce Residue System modulo $n$. Pick a
+    bijection $\omega$. Thus
+    \begin{align*}
+        \prod_{r \in R} r &\equiv \prod_{r \in R} \omega(r) \pmod n \\
+        \text{having } \prod_{r \in R} \omega(r) &= \prod_{r \in R'} r \implies \\
+        \prod_{r \in R} r &\equiv \prod_{r \in R'} r \pmod n \\
+        \prod_{r \in R} r &\equiv \prod_{r \in R } a \cdot r \pmod n \\
+        1 &\equiv a^{\Phi(n)} \pmod n
+    \end{align*}
+\end{proof}
+
+\begin{thebibliography}{99} 
+    \bibitem{basicdef}
+        Annie Xu, and Emily Zhu.
+        \textit{Euler's Totient Function and More!}
+        \begin{verbatim} http://www.math.cmu.edu/~mlavrov/arml/16-17/number-theory-09-18-16.pdf
+        \end{verbatim}
+\end{thebibliography}
+\end{document}

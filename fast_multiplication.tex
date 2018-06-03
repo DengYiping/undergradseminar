@@ -1,0 +1,233 @@
+\documentclass[12pt,a4paper]{amsart}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage[latin2]{inputenc}
+\usepackage{t1enc}
+\usepackage[mathscr]{eucal}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{pict2e}
+\usepackage{epic}
+\numberwithin{equation}{section}
+\usepackage[margin=2.9cm]{geometry}
+\usepackage{epstopdf} 
+\usepackage{float}
+\usepackage[ruled,vlined]{algorithm2e}
+
+ \def\numset#1{{\\mathbb #1}}
+
+ 
+
+\theoremstyle{plain}
+\newtheorem{Th}{Theorem}[section]
+\newtheorem{Lemma}[Th]{Lemma}
+\newtheorem{Cor}[Th]{Corollary}
+\newtheorem{Prop}[Th]{Proposition}
+
+ \theoremstyle{definition}
+\newtheorem{Def}[Th]{Definition}
+\newtheorem{Conj}[Th]{Conjecture}
+\newtheorem{Rem}[Th]{Remark}
+\newtheorem{?}[Th]{Problem}
+\newtheorem{Ex}[Th]{Example}
+
+\newcommand{\im}{\operatorname{im}}
+\newcommand{\Hom}{{\rm{Hom}}}
+\newcommand{\diam}{{\rm{diam}}}
+\newcommand{\ovl}{\overline}
+%\newcommand{\M}{\mathbb{M}}
+
+\begin{document}
+
+\title{Fast Multiplication}
+
+\author[Y. Deng]{Yiping Deng}
+
+\address{P.O 182 College Ring 7, 28759 Bremen, Germany} 
+
+\email{y.deng@jacobs-university.de}
+
+
+
+
+
+
+
+
+
+
+ \keywords{Fast multiplication, FFT, Polynomial Multiplication} 
+
+
+\begin{abstract}
+    The aim of this paper is to give a analysis of several Fast Multiplication
+    algorithms and their asympototic behaviors.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction} Multiplication of large integers were
+considered relatively expensive operation in the past. With the modern approach
+of algorithmic design, faster algorithms are developed so that multiplication of
+two large integers can be computed easily.
+
+\section{Basic Assumptions for analysis of Fast Multiplication}
+In this paper, we will assume that multiplication, addition, subtration and division of two single digit numbers, with carry, can be achieved
+in constant time.\footnote{In modern computer, addition and multiplication of two 64 bits numbers
+can be calculated in one CPU cycle}
+
+Based on the assumption, we can conclude:
+\begin{Lemma} \label{comp_addition} (Time Complexity of Addition).
+    Addition of two $n$ digits number can be achieved in $O(n)$, denoted $T(n) = O(n)$
+\end{Lemma}
+\begin{proof}
+    Consider $n = 1$, addition can be achieved by constant time, thus $T(1) = O(1)$.
+    Inductively, assume $T(n) = O(n)$ holds for $n$, consider
+    the addition of two $n + 1$ digits numbers, $a$ and $b$ in base $B$.
+    Define $$S_1 = \left\lfloor\frac{a}{B^{n}}\right\rfloor + \left\lfloor\frac{b}{B^{n}}\right\rfloor$$ $$S_2 = a \mod B^{n} + b \mod B^{n}$$
+    The division and the modulo operation on such a number can
+    be achieved in constant time. Calculation of $S_2$ involves in addition
+    of two $n$ digit number. Using such expression,
+    we can rewrite the addition
+    $$ a + b = S_1 \cdot B^n + S_2 $$
+    The additon of $S_1$ and $S_2$ \footnote{Take out the $n+1$ digits of $S_2$ and perform the carried single digit addition when calculating $S_1$}can also be achieved in constant time, resulting
+    in the following expression
+    $$ T(n + 1) = T(n) + constant $$
+    Hence, by induction hypothesis,
+    $$ T(n + 1) = O(n) + constant = O(n + 1) $$
+\end{proof}
+Also consider multiplying one single digit integer with a $n$ digit integer in base $B$
+\begin{Lemma} \label{comp_single_digit_mul} (Single Digit Multiply $n$ Digits)
+    Multiplication of a single digit integer with a $n$ digit integer has a time complexity
+    of $O(n)$.
+\end{Lemma}
+\begin{proof}
+    It is obvious for the case $n = 1$.
+
+    Inductively, given $a$ a single digit number in base $B$,
+    $b$ a $k + 1$ digits number in base $B$
+    assume Lemma~\ref{comp_single_digit_mul} holds for $n = k$. 
+    we compute
+    $$ P_1 = a \cdot \left\lfloor\frac{b}{B^k}\right\rfloor $$
+    $$ P_2 = a \cdot (b \mod B^k) $$
+    $$ a \cdot b = P_1 \cdot B^k + P_2 $$
+    Indeed, $$T(k + 1) = T(k) + constant = O(k) + constant = O(k + 1)$$
+\end{proof}
+\section{Naive Approch}
+Grade-school approach is the most intuitive algorithm for
+integer multiplication. Such a approach works for integers in
+any basis. Without loss of generality, in algorithmic analysis, integers in the base of 2 is
+considered.
+
+Using long multiplication, first we have $n$ single digit to n digits multiplication, each
+with time complexity of $O(n)$. Then we have $n - 1$ addition of $n$ at most $2n$ digits integer,
+with each addition of time complexity $O(2n)$. In total, it will
+give us a running time of
+$$ T(n) = n \cdot O(n) + (n - 1) \cdot O(2n) = O(n^2) $$
+
+
+\section{Recursive Approach}
+Without loss of generality, given two binary integer $x$, $y$, with $n$ digits, $n = 2^k, k \in \mathbb{N}$,
+we decompose $x$, $y$ by their lower and higher halfs of the digits.
+$$ x = x_l * 2^{n/2} + x_r $$
+$$ y = y_l * 2^{n/2} + y_r $$
+Thus, we rewrite $x * y$ as
+\begin{align*}
+    x \cdot y &= (x_l \cdot 2^{n/2} + x_r) \cdot (y_l \cdot 2^{n/2} + y_r) \\
+    &= x_l y_l \cdot 2^n + 2^{n/2} (x_l y_r + x_r y_l) + x_r y_r
+\end{align*}
+Note that $x_l$, $x_r$, $y_l$, $y_r$ each contains $n/2$ digits. The addition in between takes $O(n)$ times in total,
+so the recursive approach will lead to a time complexity of
+$$ T(n) = 4T(n/2) + O(n) $$
+solving the recurrence we have
+$$ T(n) = O(n^2) $$
+Suprisingly, our recursive approach is no better than our grade-school approach. This is where the Gauss trick
+comes into play.
+\section{Gauss Trick}
+The mathematician Carl Friedrich Gauss once noticed that multiplication of two complex number, $z_1 = a + b i$, $z_2 = c + d i$. 
+$$ z_1 \cdot z_2 = a c - b d + (a d + b c) \cdot i $$
+although seems to involve four read-number multiplication, it can in fact be done with just three: $a c$, $b d$, $(a + b)(c + d)$, since
+$$ b c + a d = (a + b)(c + d) - a c - b d $$
+
+Applying his trick to our multiplication problem leads to a asympotically faster recursive algorithm.
+
+\section{Recursive Approach Improved}
+Similar to Gauss' trick for complex number, we observe that
+$$ x_l y_r + x_r y_l = (x_l + x_r)(y_l + y_r) - x_l y_l - x_r y_r $$
+
+This immediately changes the recurrence relation, since our multiplication can be achieved using
+3 sub-multiplication. The resulting algorithm has a improved running time of
+\footnote{Actually, the recurrence should read $$T(n) \leq 3T(n/2 + 1) + O(n) $$ The one we are using has the same big-O running time.}
+$$ T(n) = 3T(n/2) + O(n) $$
+Again, solving the recurrence will give us
+$$ T(n) = O(n^{log_2 3})$$
+where $log_2 3 \approx 1.59$.
+
+Finally, the eternal question: \emph{Can we do better?} It turns out that we can use fast
+Fourier transform to achieve a even faster algorithm.
+
+\section{The fast Fourier transform}
+We extend our discussion of multiplication from integer to polynomial. The product of two degree-$d$ polynomials is a polynomial of degree $2d$,
+for example:
+$$(1 + 2x + 3x^2)(2 + x + 4x^2) = 2 + 5x + 12x^2 + 11x^3 + 12x^4$$
+More generally, given two degree-$d$ polynomial $A(x) = a_0 + ... + a_d x^d$ and
+$B(x) = b_0 + ... + b_d x^d$, their product $C(x) = A(x) \cdot B(x) = c_0 + ... + c_{2d} x^{2d}$ has coefficients
+$$ c_k = \sum_{i = 0}^{k} a_i b_{k -i} $$
+Computing $c_k$ takes $O(k)$ steps. Finding all $2d + 1$ coefficients would require $\Theta(n^2)$ time. \emph{Can we multiply polynomial faster than this?}
+
+The resulting algorithm is called fast Fourier transform. \\
+
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \SetKwFunction{FFFT}{FFT}
+    \SetKwProg{Fn}{Function}{:}{}
+    \Fn{\FFFT($A$, $\omega$)}{
+        \KwIn{Coefficient representation of polynomial $A(x)$ of degree $n - 1$, where $n$ is a power of 2; $\omega$, an $n$th root of unity}
+        \KwOut{Value representation of $A(\omega^0), A(\omega^1), ..., A(\omega^{n - 1})$}
+        \If{ $\omega = 1$}{
+            \KwRet{ $A(1)$ }\;
+        }
+        express $A(x)$ in the form of $A_{e}(x^2) + x A_{o}(x^2)$\;
+        call \FFFT($A_e$, $\omega^2$) to evaluate $A_e$ at even power of $w$\;
+        call \FFFT($A_o$, $\omega^2$) to evaluate $A_o$ at even power of $w$\;
+        \For{$j = 0$ to $n - 1$}{
+            compute $A(\omega^j) = A_e(\omega^{2j}) + \omega^j A_o(\omega^{2j})$\;
+        }
+        \KwRet{$A(\omega^0), ..., A(\omega^{n-1})$ }\;
+    }
+    \label{FFT}
+    \caption{fast Fourier Transform(polynomial formulation)\cite{cormen}}
+\end{algorithm}
+
+FFT will transform a polynomial from coefficient representation to value representation where
+the points $\{x_i\}$ are $n$th root of unity. 
+$$ \langle \textit{values} \rangle = FFT(\langle \textit{coefficients}\rangle, \omega) $$
+The last remaining puzzle is the inverse operation. It turns out, amazingly, that
+$$ \langle \textit{coefficients} \rangle = \frac{1}{n} FFT(\langle \textit{values} \rangle, \omega^{-1}) $$
+
+
+Algorithm~\ref{FFT} has two recursive call, with each recursive call reducing the size $n$ by half.
+The remaining operation is bounded by $O(n)$, leading to
+a overall running time of $T(n) = 2T(n/2) + O(n) = n \log n$.
+\section{Integer multiplication using FFT}
+Indeed, we can consider two arbitray $n$-digit integers $x$, $y$ in base $b$ in the following manner.
+Contruct two polynomial
+\begin{align*}
+    X(z) &= \sum_{i = 1}^{n} x_i z^{i - 1} \\
+    Y(z) &= \sum_{i = 1}^{n} y_i z^{i - 1}
+\end{align*}
+where $x_i$ and $y_i$ represent, accordingly, the $i$th digit of $x$ and $y$ from the right.
+Note that $X(b) = x$, $Y(b) = y$. Using our fast Fourier transform, we can calculate $X(z) \cdot Y(z)$ in
+its coefficient representation relatively cheap. First convert both into its value representation, calculate
+its componentwise product of the values, and convert it back to coefficient representation.
+
+Finally, once we obtained $P(z) = X(z) \cdot Y(z)$, evaluating $P(b)$ will give you exactly the multiplication of
+the integer.
+
+\bibliographystyle{plain}
+\bibliography{fast_multiplication}
+
+\end{document}
